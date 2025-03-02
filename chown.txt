@@ -1,0 +1,36 @@
+1.介绍
+--chown标志的格式允许使用用户名和组名字符串，或以任意组合形式直接使用整数UID和GID。
+提供没有组名的用户名或没有GID的UID将使用与GID相同的数字UID。
+如果提供了用户名或组名，容器的根文件系统/etc/passwd和/etc/group文件将分别用于执行从名称到整数UID或GID的翻译。
+以下示例显示了--chown标志的有效定义:
+    ADD --chown=55:mygroup files* /somedir/
+    ADD --chown=bin files* /somedir/
+    ADD --chown=1 files* /somedir/
+    ADD --chown=10:11 files* /somedir/
+
+2. chown 的作用
+在 Docker 的 ADD 和 COPY 指令中，--chown 是一个重要的参数，用于在将文件或目录添加到镜像时指定其所有权和权限。
+具体来说，--chown 允许在构建镜像时设置文件或目录的用户（UID）和用户组（GID）权限。
+
+3. chown 的格式
+--chown=<user>:：仅指定用户
+--chown=:<group>：仅指定用户组
+--chown=<user>:<group>：同时指定用户和用户组
+--chown=<UID>:<GID>：使用数字 ID 指定用户和用户组
+
+4.示例
+    （1）ADD --chown=55:mygroup files* /somedir/
+    -55 是用户 ID（UID），mygroup 是用户组名（GID）
+    -这行指令的作用是：将匹配 files* 的文件添加到 /somedir/ 目录。设置这些文件的所有权为用户 ID 55，所属组为 mygroup
+
+    （2）ADD --chown=bin files* /somedir/
+    -bin 是用户或用户组的名称。
+    -这行指令的作用是：将匹配 files* 的文件添加到 /somedir/ 目录。设置这些文件的所有权为用户或用户组 bin。如果 bin 既是一个用户又是一个组名，Docker 会优先匹配用户名称。
+
+    （3）ADD --chown=1 files* /somedir/
+    -1 是用户ID（UID）
+    -这行指令的作用是：将匹配 files* 的文件添加到 /somedir/ 目录。设置这些文件的所有权为用户 ID 1，不指定所属组。
+
+    （4）ADD --chown=10:11 files* /somedir/
+    -10 是用户 ID（UID），11 是用户组 ID（GID）。
+    -这行指令的作用是：将匹配 files* 的文件添加到 /somedir/ 目录。设置这些文件的所有权为用户 ID 10，所属组为用户组 ID 11。

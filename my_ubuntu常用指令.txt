@@ -1,0 +1,78 @@
+一、核心配置文件
+    bash (Bourne-Again SHell)
+        作用：Linux系统的默认命令解释器
+        相关文件：/bin/bash（可执行文件）
+    .bashrc
+        路径：~/.bashrc
+        作用：用户级shell配置（每次打开终端时自动执行）
+    sources.list
+        路径：/etc/apt/sources.list
+        作用：APT软件源配置文件
+        推荐配置（清华源示例）：
+            deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted
+            deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted
+二、关键命令与参数
+    1.环境管理相关
+        # Conda环境操作（适合管理不同版本的PyTorch）
+        conda create -n robot-env python=3.8
+        conda activate robot-env
+
+        # Docker容器管理（用于隔离训练环境）
+        docker run -it --gpus all -v $(pwd):/workspace pytorch/pytorch:1.9.0-cuda11.1-cudnn8-runtime
+    2.开发调试常用
+        # 实时查看训练日志（适用于强化学习训练监控）
+        tail -f training.log
+        
+        # 进程管理（查找占用GPU的进程）
+        nvidia-smi | grep python
+        kill -9 PID
+    3.文件操作增强
+        # 批量重命名机器人实验数据（使用通配符）
+        rename 's/exp1/exp2/' *.log
+        
+        # 快速查找PyTorch模型文件
+        find . -name "*.pth" -type f
+三、高频参数解析
+    -f 参数的多场景应用
+        # 强制删除Docker容器
+        docker rm -f container_name
+        
+        # 强制覆盖文件（处理训练数据时使用）
+        cp -f new_data.csv old_data.csv
+        
+        # 后台运行训练任务（适用于长期训练）
+        nohup python train.py -f config.yml > log.txt 2>&1 &
+    -r 递归操作
+        # 递归删除实验缓存
+        rm -rf ./experiments/tmp/
+        
+        # 递归复制机器人配置
+        cp -r config/ backup_config/
+四、实用技巧
+    强化学习训练优化
+        # 并行启动多个训练任务
+        for seed in {1..5}; do
+            python train.py --seed $seed --env RobotArm-v0 &
+        done
+    Docker高效用法
+        # 构建包含PyTorch和ROS的镜像
+        docker build -t robot-env -f Dockerfile .
+
+        # 带GUI支持的容器（适用于可视化调试）
+        docker run -it --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" my-robot-env
+    终端复用
+
+        # 使用tmux管理多个训练会话
+        tmux new -s robot-training
+        # 分屏监控：Ctrl+b % 水平分割，Ctrl+b " 垂直分割
+五、调试工具
+    性能监控
+        # 实时监控GPU使用（适合PyTorch训练）
+        watch -n 1 nvidia-smi
+
+        # 进程资源分析
+        htop
+    网络调试
+        # 检查Docker容器网络
+        docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' container_name
+这些配置和命令经过特别筛选，针对机器人控制策略开发中常见的环境配置、容器管理、训练任务执行等场景进行了优化。建议将常用配置写入.bashrc并通过source ~/.bashrc立即生效。在深度学习训练和机器人仿真时，合理使用&后台运行和nohup可以显著提升工作效率。

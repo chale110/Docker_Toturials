@@ -1,0 +1,74 @@
+这两段代码是 `.dockerignore` 文件中的规则，用于定义哪些文件或目录应被排除在 Docker 构建上下文之外。它们的主要区别在于规则的顺序和最终的效果，具体如下：
+
+**代码1**
+*.md
+!README*.md
+README-secret.md
+
+**代码2**
+*.md
+README-secret.md
+!README*.md
+
+**规则分析**
+
+**代码1**
+1. `*.md`：
+   - 排除所有 `.md` 文件。
+   - 处理顺序：所有 `.md` 文件（包括 `README*.md` 和其他 `.md` 文件）都会被排除。
+2. `!README*.md`：
+   -重新包含所有以 `README` 开头的 `.md` 文件。
+   -处理顺序：在第一步排除所有 `.md` 文件后，重新包含 `README*.md` 文件，这会覆盖第一步的效果。因此，`README-apple.md`、`README-xyz.md` 等文件会被包含。
+3. `README-secret.md`：
+   - 排除 `README-secret.md` 文件。
+   - 处理顺序：第三步中专门排除 `README-secret.md` 文件。因此，尽管第二步重新包含了所有 `README*.md` 文件，但 `README-secret.md` 会被再次排除。
+
+**代码2**
+1. `*.md`：
+   - 排除所有 `.md` 文件。
+   - 处理顺序：所有 `.md` 文件（包括 `README*.md` 和其他 `.md` 文件）都会被排除。
+2. `README-secret.md`：
+   - 排除 `README-secret.md` 文件。
+   - 处理顺序：这一步明确排除 `README-secret.md` 文件，但实际上，所有 `.md` 文件在第一步已经被排除了，所以这一步可能是多余的。
+3. `!README*.md`：
+   - 重新包含所有以 `README` 开头的 `.md` 文件。
+   - 处理顺序：在第三步重新包含所有 `README*.md` 文件，这会覆盖前两步的效果。因此，所有 `README*.md` 文件（包括 `README-secret.md`）都会被重新包含。
+
+**效果对比**
+
+代码1：
+- 最终结果是：
+   - 包含 `README*.md` 文件（如 `README-apple.md`、`README-xyz.md`），但排除 `README-secret.md`。
+   - 其他 `.md` 文件（如 `notes.md`、`todo.md`）仍然被排除。
+
+代码2：
+- 最终结果是：
+   - 包含所有 `README*.md` 文件（包括 `README-secret.md`）。
+   - 其他 `.md` 文件（如 `notes.md`、`todo.md`）仍然被排除。
+
+**具体示例**
+假设我们有一个目录结构如下：
+
+$file tree
+.
+├── README-apple.md
+├── README-secret.md
+├── README-xyz.md
+├── notes.md
+└── todo.md
+
+**代码1的效果**：
+- `*.md` 排除所有 `.md` 文件。
+- `!README*.md` 重新包含 `README*.md` 文件：
+  - 包含 `README-apple.md` 和 `README-xyz.md`。
+- `README-secret.md` 再次明确排除 `README-secret.md` 文件。
+- **结果**：`README-apple.md` 和 `README-xyz.md` 被包含，`README-secret.md` 被排除。
+**代码2的效果**：
+- `*.md` 排除所有 `.md` 文件。
+- `!README*.md` 重新包含所有 `README*.md` 文件：
+  - 包含 `README-apple.md`、`README-xyz.md` 和 `README-secret.md`。
+- **结果**：所有 `README*.md` 文件（包括 `README-secret.md`）都被包含。
+
+- **代码1**：禁止包含 `README-secret.md` 文件。
+- **代码2**：允许包含 `README-secret.md` 文件。
+- **规则顺序**：`.dockerignore` 规则是逐行处理的，顺序决定了最终的包含和排除效果。
